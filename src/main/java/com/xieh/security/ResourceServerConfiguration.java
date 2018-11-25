@@ -1,8 +1,6 @@
 package com.xieh.security;
 
-import com.xieh.handler.AuthExceptionEntryPoint;
-import com.xieh.handler.MyAuthenticationFailHandler;
-import com.xieh.handler.MyAuthenticationSuccessHandler;
+import com.xieh.handler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,27 +28,36 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
 	@Autowired
 	private MyAuthenticationFailHandler myAuthenticationFailHandler;
 	@Autowired
+	private MyLogoutSuccessHandler myLogoutSuccessHandler;
+	@Autowired
+	private CustomAccessDeniedHandler customAccessDeniedHandler;
+	@Autowired
 	private Filter permitAuthenticationFilter;
 
 	@Override
 	public void configure(ResourceServerSecurityConfigurer resources) {
 		resources.resourceId(RESOURCE_ID).stateless(false);
-		resources.authenticationEntryPoint(new AuthExceptionEntryPoint());
+		resources.authenticationEntryPoint(new AuthExceptionEntryPoint())//自定义授权失败处理器
+		.accessDeniedHandler(customAccessDeniedHandler);//自定义的什么处理器 好像无效
 	}
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		//http.exceptionHandling().authenticationEntryPoint(new AuthExceptionEntryPoint());
 		http.formLogin()
-		.loginProcessingUrl("/login/token")
-		.successHandler(myAuthenticationSuccessHandler)
-		.failureHandler(myAuthenticationFailHandler)
-		.and().anonymous().disable()
-		.requestMatchers().antMatchers("/**")
-		.and().authorizeRequests()
-		.antMatchers("/user*/**").permitAll()
-		.and().exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
-		.and().addFilterBefore(permitAuthenticationFilter,UsernamePasswordAuthenticationFilter.class);
+			.loginProcessingUrl("/login/token")
+			.successHandler(myAuthenticationSuccessHandler)
+			.failureHandler(myAuthenticationFailHandler)
+			.and().logout().logoutUrl("/login/out")
+			.logoutSuccessHandler(myLogoutSuccessHandler)
+			.and().anonymous().disable()
+			.requestMatchers().antMatchers("/**")
+			.and().authorizeRequests()
+			.antMatchers("/user*/**","/login/out").permitAll()
+				// configure 上面也有一个 customAccessDeniedHandler 暂时这样把
+			.and().exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
+			.authenticationEntryPoint(new AuthExceptionEntryPoint()) //给上面一样
+			.and().addFilterBefore(permitAuthenticationFilter,UsernamePasswordAuthenticationFilter.class);
 	}
 
 }

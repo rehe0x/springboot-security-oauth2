@@ -1,5 +1,6 @@
 package com.xieh.security;
 
+import com.xieh.handler.CustomWebResponseExceptionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +37,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	private AuthenticationManager authenticationManager;
 
 	@Autowired
-	private WebResponseExceptionTranslator customWebResponseExceptionTranslator;
+	private CustomWebResponseExceptionTranslator customWebResponseExceptionTranslator;
 
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -55,7 +56,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints.tokenStore(tokenStore).userApprovalHandler(userApprovalHandler)
 				.authenticationManager(authenticationManager);
-		endpoints.exceptionTranslator(customWebResponseExceptionTranslator);
+		endpoints.exceptionTranslator(customWebResponseExceptionTranslator);//自定义的处理器 好像无效
+		endpoints.reuseRefreshTokens(false);//RefreshTokens非重复使用
 
 	}
 

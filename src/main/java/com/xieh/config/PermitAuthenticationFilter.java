@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * 暂时无用
  * Created by xiech on 2018/11/23.
  */
 @Component("permitAuthenticationFilter")
@@ -46,10 +48,10 @@ public class PermitAuthenticationFilter extends OncePerRequestFilter {
 //
 //        OAuth2Authentication oAuth2Authentication = tokenStore.readAuthentication(str);
 //        //密码授权 模式, 组建 authentication
-////密码授权 模式, 组建 authentication
 //        TokenRequest tokenRequest = new TokenRequest(MapUtils.EMPTY_MAP,oAuth2Authentication.getOAuth2Request().getClientId(),oAuth2Authentication.getOAuth2Request().getScope(),"password");
-//
-//        OAuth2AccessToken oAuth2AccessToken = authorizationServerTokenServices.refreshAccessToken(str1,tokenRequest);
+//        OAuth2AccessToken oAuth2AccessToken1 = tokenStore.readAccessToken(str);
+//        String sdfg = oAuth2AccessToken1.getRefreshToken().getValue();
+//        OAuth2AccessToken oAuth2AccessToken = authorizationServerTokenServices.refreshAccessToken(sdfg,tokenRequest);
 //        response.setHeader("tt",oAuth2AccessToken.getValue().toString());
         logger.info("当前访问的地址:{}", request.getRequestURI());
         filterChain.doFilter(request, response);

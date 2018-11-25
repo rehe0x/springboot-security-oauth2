@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 自定义授权
+ * 授权失败处理器
  * Created by xiech on 2018/11/22.
  */
 public class AuthExceptionEntryPoint implements AuthenticationEntryPoint {

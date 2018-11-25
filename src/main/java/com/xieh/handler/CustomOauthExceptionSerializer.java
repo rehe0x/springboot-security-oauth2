@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ * 自定义异常返回序列化实现
  * Created by xiech on 2018/11/22.
  */
 public class CustomOauthExceptionSerializer extends StdSerializer<CustomOauthException> {
@@ -22,11 +23,9 @@ public class CustomOauthExceptionSerializer extends StdSerializer<CustomOauthExc
     @Override
     public void serialize(CustomOauthException value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
         gen.writeStartObject();
         gen.writeStringField("error", String.valueOf(value.getHttpErrorCode()));
         gen.writeStringField("message", value.getMessage());
-//        gen.writeStringField("message", "用户名或密码错误");
         gen.writeStringField("path", request.getServletPath());
         gen.writeStringField("timestamp", String.valueOf(new Date().getTime()));
         if (value.getAdditionalInformation()!=null) {

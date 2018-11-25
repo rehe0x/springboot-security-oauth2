@@ -54,6 +54,7 @@ public class OAuth2SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http
 		.headers().frameOptions().disable()
 		.and().csrf().disable();
+		//无效 和oath2应该冲突
 //		.anonymous().disable()
 //	  	.authorizeRequests()
 //	  	.antMatchers("/login/token").permitAll();

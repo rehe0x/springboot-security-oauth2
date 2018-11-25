@@ -6,6 +6,7 @@ import org.springframework.security.oauth2.provider.error.WebResponseExceptionTr
 import org.springframework.stereotype.Component;
 
 /**
+ * 自定义WebResponseExceptionTranslator异常处理器 好像无效
  * Created by xiech on 2018/11/22.
  */
 @Component("customWebResponseExceptionTranslator")

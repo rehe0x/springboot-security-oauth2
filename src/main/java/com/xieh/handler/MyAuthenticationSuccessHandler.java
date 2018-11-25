@@ -1,6 +1,7 @@
 package com.xieh.handler;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xieh.common.ResultUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,13 +17,12 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * 登陆成功处理器
  * Created by xiech on 2018/11/22.
  */
 @Component
@@ -34,16 +34,23 @@ public class MyAuthenticationSuccessHandler extends SavedRequestAwareAuthenticat
 
     @Autowired
     private AuthorizationServerTokenServices authorizationServerTokenServices;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-
+    /**
+     * 密码验证成功 > CustomOauthException异常本应该返回自定义格式 目前无效
+     * @param request
+     * @param response
+     * @param authentication
+     * @throws IOException
+     */
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        logger.info("登录成功");
-
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        logger.info("【AppLoginInSuccessHandler】 onAuthenticationSuccess authentication={}", authentication);
 
         String header = request.getHeader("Authorization");
-        if (header == null && !header.startsWith("Basic")) {
-            throw new UnapprovedClientAuthenticationException("请求投中无client信息");
+        if (header == null || !header.startsWith("Basic")) {
+            throw new CustomOauthException("请求投中无client信息");
         }
         String[] tokens = this.extractAndDecodeHeader(header, request);
 
@@ -57,10 +64,10 @@ public class MyAuthenticationSuccessHandler extends SavedRequestAwareAuthenticat
         ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);
 
         if (clientDetails == null){
-            throw new UnapprovedClientAuthenticationException("clientId 不存在"+clientId);
+            throw new CustomOauthException("clientId 不存在"+clientId);
             //判断  方言  是否一致
         }else if (!StringUtils.equals(clientDetails.getClientSecret(),clientSecret)){
-            throw new UnapprovedClientAuthenticationException("clientSecret 不匹配"+clientId);
+            throw new CustomOauthException("clientSecret 不匹配"+clientId);
         }
         //密码授权 模式, 组建 authentication
         TokenRequest tokenRequest = new TokenRequest(MapUtils.EMPTY_MAP,clientId,clientDetails.getScope(),"password");
@@ -69,14 +76,10 @@ public class MyAuthenticationSuccessHandler extends SavedRequestAwareAuthenticat
         OAuth2Authentication oAuth2Authentication = new OAuth2Authentication(oAuth2Request,authentication);
 
         OAuth2AccessToken token = authorizationServerTokenServices.createAccessToken(oAuth2Authentication);
-
-        //判断是json 格式返回 还是 view 格式返回
-        //返回view
         //super.onAuthenticationSuccess(request,response,authentication);
         //将 authention 信息打包成json格式返回
         response.setContentType("application/json;charset=UTF-8");
-        response.addCookie(new Cookie("tokenssssss",token.getValue()));
-        response.getWriter().write(JSON.toJSONString(token));
+        response.getWriter().write(objectMapper.writeValueAsString(ResultUtil.success(token)));
     }
 
 
